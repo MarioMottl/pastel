@@ -1,7 +1,9 @@
 use crate::commands::command::CommandTrait;
 use serenity::all::{
-    CommandDataOption, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    CommandDataOption, CommandDataOptionValue, CommandOptionType, Context, CreateCommand,
+    CreateCommandOption,
 };
+use serenity::gateway::ActivityData;
 
 pub struct Activity;
 
@@ -16,9 +18,16 @@ impl CommandTrait for Activity {
 
     // See: https://docs.rs/serenity/latest/serenity/client/struct.Context.html#method.online
     fn run(&self, arguments: &[CommandDataOption], ctx: &Context) -> String {
-        //TODO: Wait for the commands to update and check the _arguments
-        println!("{:?} {:?}", arguments, arguments.len());
-        "Placeholder".to_string()
+        //[CommandDataOption { name: "activity", value: String("Stafield") }]
+
+        if let Some(option) = arguments.iter().find(|opt| opt.name == "activity") {
+            if let CommandDataOptionValue::String(activity) = &option.value {
+                println!("Setting activity to: {}", activity);
+                ctx.set_activity(Some(ActivityData::playing(activity)));
+            }
+        }
+
+        "Setting activity".to_string()
     }
 
     fn register(&self) -> CreateCommand {
@@ -30,8 +39,7 @@ impl CommandTrait for Activity {
                     "activity",
                     "The activity status to set",
                 )
-                .required(true)
-                .add_string_choice("Game", "CHANGE_ME"),
+                .required(true),
             )
     }
 }

@@ -13,7 +13,7 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
                 message
             ))
         })
-        .level(log::LevelFilter::Info)
+        .level(log::LevelFilter::Warn)
         .chain(std::io::stdout())
         .apply()?;
     Ok(())

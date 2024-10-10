@@ -1,8 +1,8 @@
-use serenity::all::{
-    CommandDataOption, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-};
-
 use crate::commands::command::CommandTrait;
+use serenity::all::{
+    CommandDataOption, CommandDataOptionValue, CommandOptionType, Context, CreateCommand,
+    CreateCommandOption,
+};
 
 pub struct Presence;
 
@@ -24,11 +24,27 @@ impl CommandTrait for Presence {
          - Do Not Disturb
          - Invisible
          - Reset Presence ( default: online )
+
+        [CommandDataOption { name: "presence", value: String("dnd") }] 1
+        [CommandDataOption { name: "presence", value: String("online") }] 1
+        [CommandDataOption { name: "presence", value: String("idle") }] 1
+        [CommandDataOption { name: "presence", value: String("invisible") }] 1
+
         */
 
-        //TODO: Wait for the commands to update and check the _arguments
-        println!("{:?} {:?}", arguments, arguments.len());
-        "Placeholder".to_string()
+        if let Some(option) = arguments.iter().find(|opt| opt.name == "presence") {
+            if let CommandDataOptionValue::String(presence) = &option.value {
+                println!("Setting presence to: {}", presence);
+                match presence.as_str() {
+                    "online" => ctx.online(),
+                    "idle" => ctx.idle(),
+                    "dnd" => ctx.dnd(),
+                    "invisible" => ctx.invisible(),
+                    _ => ctx.online(),
+                }
+            }
+        }
+        "Setting presence".to_string()
     }
 
     fn register(&self) -> CreateCommand {
@@ -37,7 +53,7 @@ impl CommandTrait for Presence {
             .add_option(
                 CreateCommandOption::new(
                     CommandOptionType::String,
-                    "status",
+                    "presence",
                     "The presence status to set",
                 )
                 .required(true)
