@@ -13,25 +13,25 @@ use crate::commands::presence::Presence;
 
 pub struct Handler;
 
+static COMMANDS: &[&'static dyn CommandTrait] = &[&Ping, &Presence, &Activity];
+
 #[async_trait]
 impl EventHandler for Handler {
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         println!("Interaction: {:?}", interaction);
         if let Interaction::Command(command) = interaction {
             println!("Command: {:?}", command.data.name);
-            let content = match command.data.name.as_str() {
-                "ping" => Some(Ping.run(&command.data.options, &ctx)),
-                "presence" => Some(Presence.run(&command.data.options, &ctx)),
-                "activity" => Some(Activity.run(&command.data.options, &ctx)),
-                _ => Some("Unknown command".to_string()),
-            };
 
-            if let Some(content) = content {
-                let data = CreateInteractionResponseMessage::new().content(content);
-                let builder = CreateInteractionResponse::Message(data);
-                if let Err(why) = command.create_response(&ctx.http, builder).await {
-                    println!("Error sending response: {:?}", why);
-                }
+            let content = COMMANDS
+                .iter()
+                .find(|&&cmd| cmd.name() == command.data.name)
+                .map(|cmd| cmd.run(&command.data.options, &ctx))
+                .unwrap_or_else(|| "Unknown command".to_string());
+
+            let data = CreateInteractionResponseMessage::new().content(content);
+            let builder = CreateInteractionResponse::Message(data);
+            if let Err(why) = command.create_response(&ctx.http, builder).await {
+                println!("Error sending response: {:?}", why);
             }
         }
     }
@@ -56,8 +56,7 @@ impl EventHandler for Handler {
         Note: Global commands may take up to an hour to be updated in the user slash commands list.
         If an outdated command data is sent by a user, discord will consider it as an error and then will instantly update that command.
          */
-        let commands: Vec<&dyn CommandTrait> = vec![&Ping, &Presence, &Activity];
-        for command in commands {
+        for command in COMMANDS {
             println!("Registering command: {}", command.name());
             Command::create_global_command(&ctx.http, command.register())
                 .await
