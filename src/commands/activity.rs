@@ -15,6 +15,7 @@ impl CommandTrait for Activity {
         "Sets the activity of the bot"
     }
 
+    // See: https://docs.rs/serenity/latest/serenity/client/struct.Context.html#method.online
     fn run(&self, arguments: &[CommandDataOption], ctx: &Context) -> String {
         //TODO: Wait for the commands to update and check the _arguments
         println!("{:?} {:?}", arguments, arguments.len());

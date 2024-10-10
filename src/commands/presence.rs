@@ -15,6 +15,7 @@ impl CommandTrait for Presence {
         "Sets the presence of the bot"
     }
 
+    // See: https://docs.rs/serenity/latest/serenity/client/struct.Context.html#method.online
     fn run(&self, arguments: &[CommandDataOption], ctx: &Context) -> String {
         /*
          Possible statuses:
