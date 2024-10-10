@@ -1,8 +1,7 @@
+use crate::commands::command::CommandTrait;
 use serenity::all::{
     CommandDataOption, CommandOptionType, Context, CreateCommand, CreateCommandOption,
 };
-
-use crate::commands::command::CommandTrait;
 
 pub struct Activity;
 

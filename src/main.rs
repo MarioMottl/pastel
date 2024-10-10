@@ -1,4 +1,5 @@
 use crate::event_handler::Handler;
+use log::{error, info};
 use serenity::{all::GatewayIntents, Client};
 use std::env;
 use tokio::signal;
@@ -6,34 +7,47 @@ use tokio::signal;
 mod commands;
 mod event_handler;
 mod formatting;
+mod logger;
 
 #[tokio::main]
 async fn main() {
-    // Login with a bot token from the environment
-    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
-    // Set gateway intents, which decides what events the bot will be notified about
+    logger::logging::setup_logger().expect("Failed to initialize logger");
+    let token = match env::var("DISCORD_TOKEN") {
+        Ok(token) => token,
+        Err(why) => {
+            error!("Failed to get token: {:?}", why);
+            return;
+        }
+    };
     let intents = GatewayIntents::GUILD_MESSAGES
         | GatewayIntents::DIRECT_MESSAGES
         | GatewayIntents::MESSAGE_CONTENT;
 
-    // Create a new instance of the Client, logging in as a bot.
-    let mut client = Client::builder(&token, intents)
+    let Handler = Handler::new();
+
+    let mut client = match Client::builder(&token, intents)
         .event_handler(Handler)
         .await
-        .expect("Err creating client");
+    {
+        Ok(client) => {
+            info!("Client created successfully.");
+            client
+        }
+        Err(why) => {
+            error!("Error creating client: {:?}", why);
+            return;
+        }
+    };
 
-    // Spawn the client in a separate task
     let client_task = tokio::spawn(async move {
         if let Err(why) = client.start().await {
-            println!("Client error: {:?}", why);
+            error!("Client error: {:?}", why);
         }
     });
 
-    // Listen for the Ctrl+C signal
     signal::ctrl_c().await.expect("Failed to listen for Ctrl+C");
 
-    println!("Received Ctrl+C, shutting down.");
+    info!("Received Ctrl+C, shutting down.");
 
-    // Gracefully shut down the client
     client_task.abort();
 }
