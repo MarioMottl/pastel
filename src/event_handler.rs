@@ -6,27 +6,23 @@ use serenity::model::application::Command;
 use serenity::prelude::*;
 use std::env;
 
+use crate::commands::activity::Activity;
 use crate::commands::command::CommandTrait;
 use crate::commands::ping::Ping;
+use crate::commands::presence::Presence;
 
 pub struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
-    /*
-        TODO: Lookup how you can both have slash commands and message events in the same bot.
-
-        Commands to implement:
-        - !ping --> Pong!
-        - !help --> List of commands
-        - !coinflip heads: string, tails: string, amount: int --> Result of <amount> coinflips
-    */
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         println!("Interaction: {:?}", interaction);
         if let Interaction::Command(command) = interaction {
             println!("Command: {:?}", command.data.name);
             let content = match command.data.name.as_str() {
-                "ping" => Some(Ping.run(&command.data.options)),
+                "ping" => Some(Ping.run(&command.data.options, &ctx)),
+                "presence" => Some(Presence.run(&command.data.options, &ctx)),
+                "activity" => Some(Activity.run(&command.data.options, &ctx)),
                 _ => Some("Unknown command".to_string()),
             };
 
@@ -56,8 +52,11 @@ impl EventHandler for Handler {
                     .unwrap_or_else(|_| panic!("Failed to delete command: {}", command.name));
             }
         }
-
-        let commands: Vec<&dyn CommandTrait> = vec![&Ping];
+        /*
+        Note: Global commands may take up to an hour to be updated in the user slash commands list.
+        If an outdated command data is sent by a user, discord will consider it as an error and then will instantly update that command.
+         */
+        let commands: Vec<&dyn CommandTrait> = vec![&Ping, &Presence, &Activity];
         for command in commands {
             println!("Registering command: {}", command.name());
             Command::create_global_command(&ctx.http, command.register())

@@ -1,6 +1,5 @@
-use serenity::all::CommandDataOption;
-
 use crate::commands::command::CommandTrait;
+use serenity::all::{CommandDataOption, Context, CreateCommand};
 
 pub struct Ping;
 
@@ -13,11 +12,11 @@ impl CommandTrait for Ping {
         "Responds with 'Pong!'"
     }
 
-    fn run(&self, _arguments: &[CommandDataOption]) -> String {
+    fn run(&self, _arguments: &[CommandDataOption], _ctx: &Context) -> String {
         "Pong!".to_string()
     }
 
-    fn register(&self) -> serenity::all::CreateCommand {
-        serenity::all::CreateCommand::new(Self::name(self)).description(Self::description(self))
+    fn register(&self) -> CreateCommand {
+        CreateCommand::new(Self::name(self)).description(Self::description(self))
     }
 }
