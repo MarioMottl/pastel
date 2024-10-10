@@ -23,8 +23,6 @@ async fn main() {
         | GatewayIntents::DIRECT_MESSAGES
         | GatewayIntents::MESSAGE_CONTENT;
 
-    let Handler = Handler::new();
-
     let mut client = match Client::builder(&token, intents)
         .event_handler(Handler)
         .await

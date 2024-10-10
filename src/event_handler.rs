@@ -12,18 +12,9 @@ use crate::commands::command::CommandTrait;
 use crate::commands::ping::Ping;
 use crate::commands::presence::Presence;
 
-use crate::logger::logging::setup_logger;
-
 pub struct Handler;
 
 static COMMANDS: &[&'static dyn CommandTrait] = &[&Ping, &Presence, &Activity];
-
-impl Handler {
-    pub fn new() -> Self {
-        setup_logger().expect("Failed to initialize logger");
-        Self
-    }
-}
 
 #[async_trait]
 impl EventHandler for Handler {
