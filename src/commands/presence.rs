@@ -29,7 +29,6 @@ impl CommandTrait for Presence {
         [CommandDataOption { name: "presence", value: String("online") }] 1
         [CommandDataOption { name: "presence", value: String("idle") }] 1
         [CommandDataOption { name: "presence", value: String("invisible") }] 1
-
         */
 
         if let Some(option) = arguments.iter().find(|opt| opt.name == "presence") {

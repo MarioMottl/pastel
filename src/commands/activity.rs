@@ -18,7 +18,9 @@ impl CommandTrait for Activity {
 
     // See: https://docs.rs/serenity/latest/serenity/client/struct.Context.html#method.online
     fn run(&self, arguments: &[CommandDataOption], ctx: &Context) -> String {
-        //[CommandDataOption { name: "activity", value: String("Stafield") }]
+        /*
+        [CommandDataOption { name: "activity", value: String("Stafield") }]
+        */
 
         if let Some(option) = arguments.iter().find(|opt| opt.name == "activity") {
             if let CommandDataOptionValue::String(activity) = &option.value {
